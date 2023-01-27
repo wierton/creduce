@@ -32,30 +32,41 @@ static RegisterTransformation<RemoveStatement>
 
 class RemoveStatementAnalysisVisitor : public
   RecursiveASTVisitor<RemoveStatementAnalysisVisitor> {
+  using VisitorTy = RecursiveASTVisitor<RemoveStatementAnalysisVisitor>;
 public:
 
   explicit RemoveStatementAnalysisVisitor(RemoveStatement *Instance)
     : ConsumerInstance(Instance)
   { }
 
+  bool TraverseFunctionDecl(FunctionDecl *FD);
   bool VisitStmt(Stmt *S);
 
 private:
 
   RemoveStatement *ConsumerInstance;
+  FunctionDecl *currentFunction;
 };
+
+bool RemoveStatementAnalysisVisitor::TraverseFunctionDecl(FunctionDecl *FD) {
+  currentFunction = FD;
+  if (FD->getBody())
+    VisitorTy::TraverseStmt(FD->getBody());
+  currentFunction = nullptr;
+  return true;
+}
 
 bool RemoveStatementAnalysisVisitor::VisitStmt(Stmt *S)
 {
-  if (ConsumerInstance->isInIncludedFile(S)
-    || clang::isa<Expr>(S))
+  if (!currentFunction
+    || ConsumerInstance->isInIncludedFile(S)
+    || clang::isa<Expr>(S)
+    || clang::isa<DeclStmt>(S)
+    || clang::isa<LabelStmt>(S))
     return true;
 
   ConsumerInstance->ValidInstanceNum++;
-  if (ConsumerInstance->ValidInstanceNum ==
-      ConsumerInstance->TransformationCounter) {
-    ConsumerInstance->TheStmts.push_back(S);
-  }
+  ConsumerInstance->TheStmts.push_back(S);
   return true;
 }
 
@@ -91,9 +102,6 @@ void RemoveStatement::removeStatement()
   for (int I = ToCounter; I >= TransformationCounter; --I) {
     TransAssert((I >= 1) && "Invalid Index!");
     SourceRange Range = TheStmts[I]->getSourceRange();
-    // llvm::outs() << "try to remove statement ("
-    //   << TransformationCounter << "):\n";
-    // TheStmt->dumpPretty(*Context);
     TheRewriter.RemoveText(Range);
   }
 }
