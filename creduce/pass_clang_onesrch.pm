@@ -98,7 +98,7 @@ sub transform ($$$) {
     if (defined($sh{"start"})) {
 	delete $sh{"start"};
 	my $instances = count_instances($cfile,$which);
-	$sh{"chunk"} = 10;
+	$sh{"chunk"} = 1;
 	$sh{"instances"} = $instances;
 	print "initial granularity = $instances\n" if $DEBUG;
 	$sh{"index"} = 1;
@@ -144,11 +144,11 @@ sub transform ($$$) {
 	File::Copy::move($tmpfile, $cfile);
     } else {
       rechunk:
-	my $newchunk = round ($sh{"chunk"} / 2.0 + 1);
-	$sh{"chunk"} = $newchunk;
-	print "granularity = $newchunk\n" if $DEBUG;
-	$sh{"index"} = 1;
-	goto AGAIN;
+      # my $newchunk = round ($sh{"chunk"} / 2.0 + 1);
+	    # $sh{"chunk"} = $newchunk;
+	    # print "granularity = $newchunk\n" if $DEBUG;
+	    # $sh{"index"} = 1;
+	    # goto AGAIN;
     }
     return ($OK, \%sh);
 }
