@@ -173,6 +173,8 @@ add_executable(clang_delta
   RemoveNestedFunction.h
   RemovePointer.cpp
   RemovePointer.h
+  RemoveStatement.cpp
+  RemoveStatement.h
   RemoveTrivialBaseTemplate.cpp
   RemoveTrivialBaseTemplate.h
   RemoveUnresolvedBase.cpp

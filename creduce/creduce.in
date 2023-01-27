@@ -775,6 +775,7 @@ my @all_methods = (
 
     { "name" => "pass_clang_binsrch",    "arg" => "replace-function-def-with-decl", "first_pass_pri" => 33, "C" => 1, },
     { "name" => "pass_clang_binsrch",    "arg" => "remove-unused-function",         "first_pass_pri" => 34, "C" => 1, },
+    { "name" => "pass_clang_binsrch",    "arg" => "remove-stmt",                    "first_pass_pri" => 35, "C" => 1, },
 
     { "name" => "pass_special",  "arg" => "a",                                     "first_pass_pri" => 110, "C" => 1, },
     { "name" => "pass_special",  "arg" => "b",                      "pri" => 555,  "first_pass_pri" => 110, "C" => 1, },

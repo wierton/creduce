@@ -23,7 +23,8 @@ project(creduce)
 # Locate LLVM and check its version.  Do this here because we need the LLVM
 # package definitions in the "CMakeLists.txt" files for multiple subdirs.
 #
-find_package(LLVM REQUIRED CONFIG NO_CMAKE_BUILDS_PATH)
+find_package(LLVM REQUIRED CONFIG NO_CMAKE_BUILDS_PATH
+  HINTS /usr/lib/llvm-9/lib/cmake/llvm)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in ${LLVM_DIR}")
 if (${LLVM_PACKAGE_VERSION} VERSION_LESS "8.0")
@@ -32,7 +33,8 @@ endif()
 #
 # Do this here, too, just to keep it with the LLVM check above.
 #
-find_package(Clang REQUIRED CONFIG NO_CMAKE_BUILDS_PATH)
+find_package(Clang REQUIRED CONFIG NO_CMAKE_BUILDS_PATH
+  HINTS /usr/lib/llvm-9/lib/cmake/clang)
 message(STATUS "Using ClangConfig.cmake in ${Clang_DIR}")
 
 # Locate Perl and check its version.
