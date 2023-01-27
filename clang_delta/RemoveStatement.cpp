@@ -54,7 +54,7 @@ bool RemoveStatementAnalysisVisitor::VisitStmt(Stmt *S)
   ConsumerInstance->ValidInstanceNum++;
   if (ConsumerInstance->ValidInstanceNum ==
       ConsumerInstance->TransformationCounter) {
-    ConsumerInstance->TheStmt = S;
+    ConsumerInstance->TheStmts.push_back(S);
   }
   return true;
 }
@@ -79,8 +79,6 @@ void RemoveStatement::HandleTranslationUnit(ASTContext &Ctx)
 
   Ctx.getDiagnostics().setSuppressAllDiagnostics(false);
 
-  TransAssert(TheStmt && "NULL TheStmt!");
-
   removeStatement();
 
   if (Ctx.getDiagnostics().hasErrorOccurred() ||
@@ -88,23 +86,16 @@ void RemoveStatement::HandleTranslationUnit(ASTContext &Ctx)
     TransError = TransInternalError;
 }
 
-static int getOffset(const char *Buf, char Symbol)
-{
-  int Offset = 0;
-  while (*Buf != Symbol) {
-    Buf--;
-    if (*Buf == '\0')
-      break;
-    Offset--;
-  }
-  return Offset;
-}
-
 void RemoveStatement::removeStatement()
 {
-  SourceManager &SrcManager = TheRewriter.getSourceMgr();
-  SourceRange Range = TheStmt->getSourceRange();
-  TheRewriter.RemoveText(Range);
+  for (int I = ToCounter; I >= TransformationCounter; --I) {
+    TransAssert((I >= 1) && "Invalid Index!");
+    SourceRange Range = TheStmts[I]->getSourceRange();
+    // llvm::outs() << "try to remove statement ("
+    //   << TransformationCounter << "):\n";
+    // TheStmt->dumpPretty(*Context);
+    TheRewriter.RemoveText(Range);
+  }
 }
 
 RemoveStatement::~RemoveStatement()

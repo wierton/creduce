@@ -218,6 +218,9 @@ add_custom_target(Modules ALL
     ${PROJECT_SOURCE_DIR}/pass_clang_binsrch.pm
     ${PROJECT_BINARY_DIR}
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${PROJECT_SOURCE_DIR}/pass_clang_onesrch.pm
+    ${PROJECT_BINARY_DIR}
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${PROJECT_SOURCE_DIR}/pass_clex.pm
     ${PROJECT_BINARY_DIR}
   COMMAND ${CMAKE_COMMAND} -E copy_if_different

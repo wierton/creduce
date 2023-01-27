@@ -28,9 +28,8 @@ friend class RemoveStatementAnalysisVisitor;
 public:
 
   RemoveStatement(const char *TransName, const char *Desc)
-    : Transformation(TransName, Desc),
-      AnalysisVisitor(0),
-      TheStmt(0)
+    : Transformation(TransName, Desc, true),
+      AnalysisVisitor(0)
   { }
 
   ~RemoveStatement();
@@ -43,7 +42,7 @@ private:
 
   RemoveStatementAnalysisVisitor *AnalysisVisitor;
 
-  clang::Stmt *TheStmt;
+  std::vector<clang::Stmt *> TheStmts;
 
   // Unimplemented
   RemoveStatement();
