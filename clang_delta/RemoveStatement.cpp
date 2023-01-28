@@ -42,11 +42,7 @@ public:
       : ConsumerInstance(Instance) {}
 
   bool TraverseFunctionDecl(FunctionDecl *FD);
-  bool VisitStmt(Stmt *S);
-  bool TraverseDeclStmt(DeclStmt *S) {
-    VisitStmt(S);
-    return true;
-  }
+  bool TraverseStmt(Stmt *S);
 
 private:
   RemoveStatement *ConsumerInstance;
@@ -60,21 +56,25 @@ bool RemoveStatementAnalysisVisitor::TraverseFunctionDecl(FunctionDecl *FD) {
   return true;
 }
 
-bool RemoveStatementAnalysisVisitor::VisitStmt(Stmt *S) {
+bool RemoveStatementAnalysisVisitor::TraverseStmt(Stmt *S) {
   if (!currentFunction ||
       ConsumerInstance->isInIncludedFile(S)
       // || clang::isa<DeclStmt>(S)
       || clang::isa<LabelStmt>(S))
-    return true;
-
-  // check if is a nested expr
-  if (clang::isa<Expr>(S)) {
-    const auto &parents = ConsumerInstance->Context->getParents(*S);
-    if (!parents.empty() && !parents[0].get<clang::CompoundStmt>()) return true;
-  }
+    return VisitorTy::TraverseStmt(S);
 
   ConsumerInstance->ValidInstanceNum++;
+  unsigned B = ConsumerInstance->TheStmts.size();
   ConsumerInstance->TheStmts.push_back(S);
+
+  // this will miss the case of ExprStmt
+  if (!clang::isa<DeclStmt>(S) && !clang::isa<Expr>(S))
+    VisitorTy::TraverseStmt(S);
+  unsigned E = ConsumerInstance->TheStmts.size();
+
+  auto &nChilds = ConsumerInstance->nChilds;
+  while (nChilds.size() <= B) nChilds.push_back(0);
+  nChilds[B] = E - B - 1;
   return true;
 }
 
@@ -104,10 +104,12 @@ void RemoveStatement::HandleTranslationUnit(ASTContext &Ctx) {
 
 void RemoveStatement::removeStatement() {
   unsigned N = TheStmts.size();
-  for (int I = TransformationCounter; I < ToCounter; ++I) {
-    TransAssert((I >= 1 && I <= N) && "Invalid Index!");
-    SourceRange Range = TheStmts.at(N - I)->getSourceRange();
+  for (int I = TransformationCounter; I <= ToCounter; ++I) {
+    int J = N - I;
+    TransAssert((0 <= J && J < N) && "Invalid Index!");
+    SourceRange Range = TheStmts.at(J)->getSourceRange();
     TheRewriter.RemoveText(Range);
+    if (nChilds[J] > 0) I += nChilds[J];
   }
 }
 

@@ -43,6 +43,7 @@ private:
   RemoveStatementAnalysisVisitor *AnalysisVisitor;
 
   std::vector<clang::Stmt *> TheStmts;
+  std::vector<unsigned> nChilds;
 
   // Unimplemented
   RemoveStatement();
